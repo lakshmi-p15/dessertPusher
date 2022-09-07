@@ -29,6 +29,9 @@ import androidx.lifecycle.LifecycleObserver
 import com.example.android.dessertpusher.databinding.ActivityMainBinding
 import timber.log.Timber
 
+const val KEY_REVENUE = "key_revenue"
+const val KEY_DESSERTSSOLD = "dessertsSold"
+const val KEY_TIMER = "key_timer"
 class MainActivity : AppCompatActivity(), LifecycleObserver {
 
     private var revenue = 0
@@ -74,8 +77,13 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
         binding.dessertButton.setOnClickListener {
             onDessertClicked()
         }
+        dessertTimer = DessertTimer(this.lifecycle)
+        if (savedInstanceState!= null){
+            revenue = savedInstanceState.getInt(KEY_REVENUE)
+            dessertsSold = savedInstanceState.getInt(KEY_DESSERTSSOLD)
+            dessertTimer.secondsCount = savedInstanceState.getInt(KEY_TIMER)
+        }
 
-        dessertTimer = DessertTimer()
         // Set the TextViews to the right values
         binding.revenue = revenue
         binding.amountSold = dessertsSold
@@ -151,9 +159,20 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(KEY_REVENUE, revenue)
+        outState.putInt(KEY_DESSERTSSOLD, dessertsSold)
+        outState.putInt(KEY_TIMER, dessertTimer.secondsCount)
+        Timber.i("onSavedInstanceState called")
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        Timber.i( "onRestoreInstanceState Called")
+    }
     override fun onStart() {
         super.onStart()
-        dessertTimer.startTimer()
         Timber.i( "onStart Called")
     }
 
@@ -168,7 +187,6 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
 
     override fun onStop() {
         super.onStop()
-        dessertTimer.stopTimer()
         Timber.i( "onStop Called")
     }
     override fun onRestart() {
